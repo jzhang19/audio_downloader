@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project Ximalaya</title>
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta charset="utf-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  	<script type="text/javascript" src="js/home.js"></script>
+	<style>
+	table {
+    	font-family: arial, sans-serif;
+    	border-collapse: collapse;
+    	width: 100%;
+	}
+	
+	td, th {
+    	border: 1px solid #dddddd;
+    	text-align: left;
+    	padding: 8px;
+	}
+
+	tr:nth-child(even) {
+    	background-color: #dddddd;
+	}
+</style>
+</head>
+<body>
+	<div>
+		<div id="availableAlbums">
+			<span>5940471</span>
+		</div>
+		<div>
+			<label for="url">Url</label>
+			<input size="60" type="text" id="url" value="https://www.ximalaya.com/revision/play/album" />
+			<label for="albumId">Album Id</label>
+			<input size="15" type="text" id="albumId" value="5940471" />
+			<label for="pageNum">Page #</label>
+			<input type="number" id="pageNum" min="1" max="100" value="1" />
+			<button type="button" id="getList">Get</button>
+			<button type="button" id="downloadAll">Download All</button>
+		</div>
+		<table id="playlist">
+			<thead>
+				<tr>
+    				<th>Id</th>
+    				<th>Name</th>
+    				<th>TrackName</th>
+					<th>Src</th>
+					<th>Action</th>
+  				</tr>
+			</thead>
+		</table>
+	</div>
+</body>
+</html>
