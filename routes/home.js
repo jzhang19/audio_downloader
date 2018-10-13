@@ -48,36 +48,53 @@ var download = function(req, res){
 var downloadAll = function(req, res){
   var playlist = req.body.playlist;
 
-  var dir = "D:\\有声小说\\ximalaya\\" + playlist[0].albumName;
-  if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir);
-  }
-
   async.eachLimit(playlist, 5, function(play, callback) {
-    var path = "D:\\有声小说\\ximalaya" + "\\" + play.albumName + "\\" + play.trackName + ".mp3";
+    // Get albumName as folder path
+    var dir = "D:\\有声小说\\ximalaya\\" + play.albumName;
 
-    fs.access(path, fs.constants.F_OK, (err) => {
+    // Check if folder exsits
+    fs.access(dir, fs.constants.F_OK, (err) => {
+      // If folder doesn't exists
       if(err){
-        console.log("File Doesn't Exist: start downloading: " + play.trackName);
-        var file = fs.createWriteStream(path);
-        var request = http.get(play.src, function(response) {
-          response.pipe(file);
-          file.on('finish', function() {
-            console.log("File is doanloded: " + play.trackName);
-            file.close(callback);  
-          });
-        }).on('error', function(err) {
-          fs.unlink(path);
-          if (callback) callback(err.message);
+        fs.mkdir(dir, function(err){
+          downloadFile(play, callback);
         });
+        // If folder already exists
       } else {
-        console.log("File Exists");
-        callback();
+        downloadFile(play, callback);
       }
     });
   });
   res.json(true);
 };
+
+var downloadFile = function(play, callback) {
+  var path = "D:\\有声小说\\ximalaya" + "\\" + play.albumName + "\\" + play.trackName + ".mp3";
+
+  // Check if file already exists
+  fs.access(path, fs.constants.F_OK, (err) => {
+    // If file doesn't exist start downloading
+    if(err){
+      console.log("File Doesn't Exist: start downloading: " + play.trackName);
+      var file = fs.createWriteStream(path);
+      var request = http.get(play.src, function(response) {
+        response.pipe(file);
+        file.on('finish', function() {
+          console.log("File is downloaded: " + play.trackName);
+          file.close(callback);  
+        });
+      }).on('error', function(err) {
+        fs.unlink(path);
+        if (callback) callback(err.message);
+      });
+    // If file already exists
+    } else {
+      console.log("File Exists");
+      callback();
+    }
+  });
+};
+
 
 module.exports = exports = {
   "index" :                index,
