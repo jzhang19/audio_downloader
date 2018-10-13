@@ -28,35 +28,79 @@
 
             url = $('#url').val();
             albumId = $('#albumId').val();
-            pageNum = $('#pageNum').val();
-            path = url + '?albumId=' + albumId + '&pageNum=' + pageNum + '&sort=-1&pageSize=30';
-            $.getJSON(path, function(response){
-                data = response.data;
-                playlist = data.tracksAudioPlay;
-                console.log(playlist);
+            pageNum = parseInt($('#pageNum').val(), 10);
+            pageNumTo = $('#pageNumTo').val() ? parseInt($('#pageNumTo').val(), 10) : "";
 
-                var tbody = $('<tbody/>');
-                for (var i = 0; i < playlist.length; i++) {
-                    var tr = $('<tr/>').appendTo(tbody);
-                    tr.append('<td>' + playlist[i]['albumId'] + '</td>');
-                    tr.append('<td>' + playlist[i]['albumName'] + '</td>');
-                    tr.append('<td class="trackName">' + playlist[i]['trackName'] + '</td>');
-                    tr.append('<td class="src">' + playlist[i]['src'] + '</td>');
-                    tr.append('<td><button type="button">Download</button></td>');
-                }
-                $table.append(tbody);
-
-                if($("#playlist tbody")){
-                    $('#playlist tbody').on('click', 'button', function(){
-                        var trackName = $(this).closest('tr').find('.trackName').text();
-                        for(var j = 0; j < playlist.length; j++) {
-                            if(playlist[j].trackName === trackName){
-                                download(playlist[j]);
-                            }
+            var allPlayList = [];
+            var promiseList = [];
+            if(pageNumTo) {
+                for(var i = pageNum; i < pageNumTo + 1; i++) {
+                    path = url + '?albumId=' + albumId + '&pageNum=' + i + '&sort=-1&pageSize=30';
+                    var deferred = $.ajax(path, {
+                        success: function(data) {
+                            allPlayList.push(data);
                         }
                     });
+                    promiseList.push(deferred);
                 }
-            });
+
+                $.when.apply($, promiseList).then(function() {
+                    playlist = [];
+                    for(var i = 0; i < allPlayList.length; i++) {
+                        playlist = playlist.concat(allPlayList[i].data.tracksAudioPlay);
+                    }
+                    var tbody = $('<tbody/>');
+                    for (var i = 0; i < playlist.length; i++) {
+                        var tr = $('<tr/>').appendTo(tbody);
+                        tr.append('<td>' + playlist[i]['albumId'] + '</td>');
+                        tr.append('<td>' + playlist[i]['albumName'] + '</td>');
+                        tr.append('<td class="trackName">' + playlist[i]['trackName'] + '</td>');
+                        tr.append('<td class="src">' + playlist[i]['src'] + '</td>');
+                        tr.append('<td><button type="button">Download</button></td>');
+                    }
+                    $table.append(tbody);
+    
+                    if($("#playlist tbody")){
+                        $('#playlist tbody').on('click', 'button', function(){
+                            var trackName = $(this).closest('tr').find('.trackName').text();
+                            for(var j = 0; j < playlist.length; j++) {
+                                if(playlist[j].trackName === trackName){
+                                    download(playlist[j]);
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                path = url + '?albumId=' + albumId + '&pageNum=' + pageNum + '&sort=-1&pageSize=30';
+                $.getJSON(path, function(response){
+                    data = response.data;
+                    playlist = data.tracksAudioPlay;
+                    console.log(playlist);
+    
+                    var tbody = $('<tbody/>');
+                    for (var i = 0; i < playlist.length; i++) {
+                        var tr = $('<tr/>').appendTo(tbody);
+                        tr.append('<td>' + playlist[i]['albumId'] + '</td>');
+                        tr.append('<td>' + playlist[i]['albumName'] + '</td>');
+                        tr.append('<td class="trackName">' + playlist[i]['trackName'] + '</td>');
+                        tr.append('<td class="src">' + playlist[i]['src'] + '</td>');
+                        tr.append('<td><button type="button">Download</button></td>');
+                    }
+                    $table.append(tbody);
+    
+                    if($("#playlist tbody")){
+                        $('#playlist tbody').on('click', 'button', function(){
+                            var trackName = $(this).closest('tr').find('.trackName').text();
+                            for(var j = 0; j < playlist.length; j++) {
+                                if(playlist[j].trackName === trackName){
+                                    download(playlist[j]);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
         });
 
         $('#downloadAll').on('click', function(){
@@ -86,11 +130,12 @@
             $.ajax({
                 type: "POST",
                 url: localhost + "/downloadAll",
-                data: postData,
+                data: JSON.stringify(postData),
                 success: function(data){
                     console.log("Success");
                 },
-                dataType: "json"
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
             });
         };
     });

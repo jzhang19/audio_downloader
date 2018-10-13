@@ -17,7 +17,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('environment', process.env.NODE_ENV || 'development');
 app.use(cookieParser());
-app.use(bodyParser.json({limit: '10mb'}));
+app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({ extended: true}));
 
 routes(app);
