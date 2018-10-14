@@ -82,7 +82,7 @@ var downloadAll = function(req, res){
 };
 
 var downloadFile = function(play, callback, unmatchedFileSizeList) {
-  var path = "D:\\有声小说\\ximalaya" + "\\" + play.albumName + "\\" + play.trackName + ".mp3";
+  var path = "D:\\有声小说\\ximalaya" + "\\" + play.albumName + "\\" + play.trackName.replace(/[/\\?%*:|"<>]/g, '-') + ".mp3";
 
   // Check if file already exists
   fs.access(path, fs.constants.F_OK, (err) => {
