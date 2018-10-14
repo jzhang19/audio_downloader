@@ -11,14 +11,47 @@
     var data = null;
     var playlist = [];
     var $table = null;
+    var albums = [];
 
     $( document ).ready(function() {
 
+        var init = function() {
+            $.ajax({
+                type: "GET",
+                url: localhost + "/readAlbums",
+                success: function(data){
+                    if(data){
+                        populateAlbums(data);
+                    }
+                    
+                }
+            });
+        }
+        
         $table = $('#playlist');
 
         $('#availableAlbums').on('click', function(e){
             target = e.target || e.srcElement;
             $("#albumId").val($(target).text());
+        });
+
+        $('#addAlbum #add').on('click', function(e){
+            var name = $('#addAlbum #name').val();
+            var id = $('#addAlbum #uniqueId').val();
+            var postData = {
+                "name": name,
+                "id": id
+            };
+            $.ajax({
+                type: "POST",
+                url: localhost + "/writeAlbums",
+                data: postData,
+                success: function(data){
+                    if(data){
+                        populateAlbums(data);
+                    }
+                }
+            });
         });
 
         $('#getList').on('click', function(){
@@ -135,8 +168,23 @@
                     console.log("Success");
                 },
                 dataType: "json",
-                contentType: 'application/json; charset=utf-8',
+                contentType: 'application/json; charset=utf-8'
             });
         };
+
+        function populateAlbums(albums) {
+            if($("#availableAlbums")){
+                $("#availableAlbums").empty();
+            }
+
+            $availableAlbums = $('#availableAlbums');
+            if(albums && albums.length > 0) {
+                for(var i = 0; i < albums.length; i++){
+                    $availableAlbums.append(albums[i].name + "<span>" + albums[i]['id'] + "</span><br>");
+                }
+            }
+        };
+
+        init();
     });
 })();

@@ -112,9 +112,47 @@ var downloadFile = function(play, callback, unmatchedFileSizeList) {
   });
 };
 
+var readAlbums = function(req, res) {
+  fs.readFile('dataFile.json', 'utf8', function readFileCallback(err, data){
+    if (err){
+      if(err.code === 'ENOENT'){
+        fs.writeFile('dataFile.json', '', 'utf8', function(){}); 
+        res.json();
+      } 
+      return err;
+    } else {
+      var obj = null;
+      if(data){
+        obj = JSON.parse(data);
+      }
+      res.json(obj);
+    }
+  });
+};
+
+var writeAlbums = function(req, res) {
+  var value = req.body;
+  fs.readFile('dataFile.json', 'utf8', function readFileCallback(err, data){
+    if (err){
+      return err;
+    } else {
+      var obj = [];
+      if(data){
+        obj = JSON.parse(data);
+      }
+      obj.push(value);
+      var json = JSON.stringify(obj); 
+      fs.writeFile('dataFile.json', json, 'utf8', function(error, data){
+        res.json(obj);
+      }); 
+    }
+  });
+};
 
 module.exports = exports = {
   "index" :                index,
   "download" :             download,
-  "downloadAll" :          downloadAll
+  "downloadAll" :          downloadAll,
+  "readAlbums" :           readAlbums,
+  "writeAlbums" :          writeAlbums
 };
