@@ -22,7 +22,6 @@ var index = function(req, res){
 
 var download = function(req, res){
   var play = req.body.play;
-  console.log(play);
 
   var dir = "D:\\有声小说\\ximalaya\\" + play.albumName;
   if (!fs.existsSync(dir)){
@@ -35,8 +34,17 @@ var download = function(req, res){
     if(err){
       console.log("File Doesn't Exist");
       var file = fs.createWriteStream(path);
+      var downloadedSize = 0;
       var request = http.get(play.src, function(response) {
+        downloadedSize = response.headers[ 'content-length' ];
         response.pipe(file);
+      });
+      file.on('finish', function () {
+        if(downloadedSize == fs.statSync(path).size) {
+          console.log("Size Match", path)
+        } else {
+          console.log("Size unmatch", path)
+        }
       });
     } else {
       console.log("File Exists");
@@ -64,6 +72,8 @@ var downloadAll = function(req, res){
         downloadFile(play, callback);
       }
     });
+  }, function() {
+    console.log("==================================================================================");
   });
   res.json(true);
 };
@@ -75,12 +85,16 @@ var downloadFile = function(play, callback) {
   fs.access(path, fs.constants.F_OK, (err) => {
     // If file doesn't exist start downloading
     if(err){
-      console.log("File Doesn't Exist: start downloading: " + play.trackName);
       var file = fs.createWriteStream(path);
       var request = http.get(play.src, function(response) {
         response.pipe(file);
+        var downloadedSize = response.headers[ 'content-length' ];
         file.on('finish', function() {
-          console.log("File is downloaded: " + play.trackName);
+          if(downloadedSize == fs.statSync(path).size) {
+            console.log("==================> Size Match", path)
+          } else {
+            console.log("Size unmatch", path)
+          }
           file.close(callback);  
         });
       }).on('error', function(err) {
@@ -89,7 +103,6 @@ var downloadFile = function(play, callback) {
       });
     // If file already exists
     } else {
-      console.log("File Exists");
       callback();
     }
   });
