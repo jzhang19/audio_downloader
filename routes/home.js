@@ -55,6 +55,7 @@ var download = function(req, res){
 
 var downloadAll = function(req, res){
   var playlist = req.body.playlist;
+  var unmatchedFileSizeList = [];
 
   async.eachLimit(playlist, 5, function(play, callback) {
     // Get albumName as folder path
@@ -65,20 +66,22 @@ var downloadAll = function(req, res){
       // If folder doesn't exists
       if(err){
         fs.mkdir(dir, function(err){
-          downloadFile(play, callback);
+          downloadFile(play, callback, unmatchedFileSizeList);
         });
         // If folder already exists
       } else {
-        downloadFile(play, callback);
+        downloadFile(play, callback, unmatchedFileSizeList);
       }
     });
   }, function() {
+    console.log("==================================================================================");
+    console.log(unmatchedFileSizeList);
     console.log("==================================================================================");
   });
   res.json(true);
 };
 
-var downloadFile = function(play, callback) {
+var downloadFile = function(play, callback, unmatchedFileSizeList) {
   var path = "D:\\有声小说\\ximalaya" + "\\" + play.albumName + "\\" + play.trackName + ".mp3";
 
   // Check if file already exists
@@ -94,6 +97,7 @@ var downloadFile = function(play, callback) {
             console.log("==================> Size Match", path)
           } else {
             console.log("Size unmatch", path)
+            unmatchedFileSizeList.push(path);
           }
           file.close(callback);  
         });
