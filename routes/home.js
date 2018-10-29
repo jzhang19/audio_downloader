@@ -57,7 +57,7 @@ var downloadAll = function(req, res){
   var playlist = req.body.playlist;
   var unmatchedFileSizeList = [];
 
-  async.eachLimit(playlist, 5, function(play, callback) {
+  async.eachLimit(playlist, 50, function(play, callback) {
     // Get albumName as folder path
     var dir = "D:\\有声小说\\ximalaya\\" + play.albumName;
 
